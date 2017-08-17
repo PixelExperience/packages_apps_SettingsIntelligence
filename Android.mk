@@ -26,6 +26,9 @@ LOCAL_PRIVILEGED_MODULE := true
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     android-support-v4
 
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    settings-intelligence-contract
+
 LOCAL_USE_AAPT2 := true
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res

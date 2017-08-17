@@ -21,6 +21,8 @@
     <uses-sdk android:minSdkVersion="25" android:targetSdkVersion="25" />
 
     <application>
-
+        <service
+            android:name=".suggestions.SuggestionService"
+            android:exported="true" />
     </application>
 </manifest>
