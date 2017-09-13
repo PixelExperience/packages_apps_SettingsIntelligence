@@ -22,10 +22,10 @@ import org.robolectric.annotation.Config;
 
 @RunWith(SettingsIntelligenceRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
-public class DummyTest {
+public class SuggestionServiceTest {
 
     @Test
     public void testRun() {
-        
+
     }
 }
