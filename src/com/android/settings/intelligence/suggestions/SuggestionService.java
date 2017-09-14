@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.settings.intelligence;
+package com.android.settings.intelligence.suggestions;
 
-public class DummyClass {
-    // TODO: Delete me
+public class SuggestionService {
+
+    private static final String TAG = "SuggestionService";
+
 }
