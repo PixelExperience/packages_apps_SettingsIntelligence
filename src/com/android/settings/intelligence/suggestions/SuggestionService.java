@@ -16,8 +16,26 @@
 
 package com.android.settings.intelligence.suggestions;
 
-public class SuggestionService {
+import android.service.settings.suggestions.Suggestion;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class SuggestionService extends android.service.settings.suggestions.SuggestionService  {
 
     private static final String TAG = "SuggestionService";
+
+    @Override
+    public List<Suggestion> onGetSuggestions() {
+        final List<Suggestion> data = new ArrayList<>();
+        data.add(new Suggestion.Builder("test").build());
+        return data;
+    }
+
+    @Override
+    public void onSuggestionDismissed(Suggestion suggestion) {
+        Log.d(TAG, "dismissing suggestion " + suggestion.getTitle());
+    }
 
 }
