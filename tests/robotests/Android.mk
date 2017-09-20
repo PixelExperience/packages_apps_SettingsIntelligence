@@ -8,6 +8,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, runners/android_mk src)
 
 # Include the testing libraries (JUnit4 + Robolectric libs).
 LOCAL_STATIC_JAVA_LIBRARIES := \
+    mockito-robolectric-prebuilt \
     truth-prebuilt
 
 LOCAL_JAVA_LIBRARIES := \
