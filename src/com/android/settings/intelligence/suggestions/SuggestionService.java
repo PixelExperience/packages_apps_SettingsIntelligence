@@ -16,26 +16,39 @@
 
 package com.android.settings.intelligence.suggestions;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.service.settings.suggestions.Suggestion;
 import android.util.Log;
 
-import java.util.ArrayList;
+import com.android.settings.intelligence.suggestions.ranking.SuggestionRanker;
+
 import java.util.List;
 
-public class SuggestionService extends android.service.settings.suggestions.SuggestionService  {
+public class SuggestionService extends android.service.settings.suggestions.SuggestionService {
 
     private static final String TAG = "SuggestionService";
 
+    private static final String SHARED_PREF_FILENAME = "suggestions";
+
     @Override
     public List<Suggestion> onGetSuggestions() {
-        final List<Suggestion> data = new ArrayList<>();
-        data.add(new Suggestion.Builder("test").build());
-        return data;
+        final SuggestionParser parser = new SuggestionParser(this);
+        final List<Suggestion> list = parser.getSuggestions();
+        SuggestionRanker.getInstance(this).rankSuggestions(list);
+        return list;
     }
 
     @Override
     public void onSuggestionDismissed(Suggestion suggestion) {
-        Log.d(TAG, "dismissing suggestion " + suggestion.getTitle());
+        final String id = suggestion.getId();
+        Log.d(TAG, "dismissing suggestion " + id);
+        SuggestionDismissHandler.getInstance()
+                .markSuggestionDismissed(this /* context */, id);
     }
 
+    public static SharedPreferences getSharedPrefs(Context context) {
+        return context.getApplicationContext()
+                .getSharedPreferences(SHARED_PREF_FILENAME, Context.MODE_PRIVATE);
+    }
 }

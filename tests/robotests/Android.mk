@@ -13,7 +13,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_JAVA_LIBRARIES := \
     junit \
-    platform-robolectric-prebuilt \
+    platform-robolectric-3.4.2-prebuilt \
     sdk_vcurrent
 
 LOCAL_INSTRUMENTATION_FOR := SettingsIntelligence
@@ -37,4 +37,4 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_TEST_PACKAGE := SettingsIntelligence
 
-include prebuilts/misc/common/robolectric/run_robotests.mk
+include prebuilts/misc/common/robolectric/3.4.2/run_robotests.mk

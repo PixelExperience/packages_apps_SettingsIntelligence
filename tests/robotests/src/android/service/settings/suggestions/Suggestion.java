@@ -61,13 +61,6 @@ public class Suggestion {
         mId = builder.mId;
     }
 
-    private Suggestion(Parcel in) {
-        mId = in.readString();
-        mTitle = in.readCharSequence();
-        mSummary = in.readCharSequence();
-        mPendingIntent = in.readParcelable(PendingIntent.class.getClassLoader());
-    }
-
     /**
      * Builder class for {@link Suggestion}.
      */

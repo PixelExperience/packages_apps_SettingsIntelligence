@@ -13,19 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.settings.intelligence;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
+public class TestConfig {
 
-@RunWith(SettingsIntelligenceRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
-public class SuggestionServiceTest {
+    public static final String MANIFEST_PATH = "--default";
+    public static final int SDK_VERSION = 26;
 
-    @Test
-    public void testRun() {
-
-    }
 }
