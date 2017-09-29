@@ -20,7 +20,6 @@ package com.android.settings.intelligence;
  * Constants for Robolectric config.
  */
 public class TestConfig {
-    public static final int SDK_VERSION = 23;
-    public static final String MANIFEST_PATH =
-            "packages/apps/SettingsIntelligence/Turbo/AndroidManifest.xml";
+    public static final int SDK_VERSION = 26;
+    public static final String MANIFEST_PATH = "--default";
 }

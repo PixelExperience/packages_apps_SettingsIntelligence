@@ -20,12 +20,12 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.service.settings.suggestions.Suggestion;
 
-import com.android.settings.intelligence.SettingsIntelligenceRobolectricTestRunner;
 import com.android.settings.intelligence.TestConfig;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@RunWith(SettingsIntelligenceRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class SuggestionFeaturizerTest {
 

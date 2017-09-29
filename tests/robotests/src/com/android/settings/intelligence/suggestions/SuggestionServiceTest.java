@@ -20,17 +20,17 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.service.settings.suggestions.Suggestion;
 
-import com.android.settings.intelligence.SettingsIntelligenceRobolectricTestRunner;
 import com.android.settings.intelligence.TestConfig;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ServiceController;
 import org.robolectric.annotation.Config;
 
-@RunWith(SettingsIntelligenceRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class SuggestionServiceTest {
 

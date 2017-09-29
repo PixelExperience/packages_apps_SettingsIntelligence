@@ -18,16 +18,16 @@ package com.android.settings.intelligence.suggestions.ranking;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.android.settings.intelligence.SettingsIntelligenceRobolectricTestRunner;
 import com.android.settings.intelligence.TestConfig;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-@RunWith(SettingsIntelligenceRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class EventStoreTest {
     private EventStore mEventStore;

@@ -16,32 +16,21 @@
 
 package com.android.settings.intelligence.suggestions;
 
-import static com.android.settings.intelligence.suggestions.model.CandidateSuggestion
-        .META_DATA_PREFERENCE_ICON;
-import static com.android.settings.intelligence.suggestions.model.CandidateSuggestion
-        .META_DATA_PREFERENCE_SUMMARY;
-import static com.android.settings.intelligence.suggestions.model.CandidateSuggestion
-        .META_DATA_PREFERENCE_SUMMARY_URI;
-import static com.android.settings.intelligence.suggestions.model.CandidateSuggestion
-        .META_DATA_PREFERENCE_TITLE;
 import static com.android.settings.intelligence.suggestions.model.CandidateSuggestionTest.newInfo;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
-import android.os.Bundle;
 import android.service.settings.suggestions.Suggestion;
 
-import com.android.settings.intelligence.SettingsIntelligenceRobolectricTestRunner;
 import com.android.settings.intelligence.TestConfig;
 import com.android.settings.intelligence.suggestions.model.SuggestionCategoryRegistry;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
@@ -49,7 +38,7 @@ import org.robolectric.shadows.ShadowPackageManager;
 
 import java.util.List;
 
-@RunWith(SettingsIntelligenceRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class SuggestionParserTest {
 
