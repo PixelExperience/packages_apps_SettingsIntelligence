@@ -16,13 +16,11 @@
 
 package com.android.settings.intelligence;
 
-import java.util.List;
 import org.junit.runners.model.InitializationError;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.manifest.AndroidManifest;
 import org.robolectric.res.Fs;
-import org.robolectric.res.ResourcePath;
 
 /**
  * Custom test runner for dealing with resources from multiple sources. This is needed because the
@@ -32,7 +30,8 @@ import org.robolectric.res.ResourcePath;
 public class SettingsIntelligenceRobolectricTestRunner extends RobolectricTestRunner {
 
     /** We don't actually want to change this behavior, so we just call super. */
-    public SettingsIntelligenceRobolectricTestRunner(Class<?> testClass) throws InitializationError {
+    public SettingsIntelligenceRobolectricTestRunner(Class<?> testClass)
+            throws InitializationError {
         super(testClass);
     }
 
@@ -44,7 +43,7 @@ public class SettingsIntelligenceRobolectricTestRunner extends RobolectricTestRu
     @Override
     protected AndroidManifest getAppManifest(Config config) {
         // Using the manifest file's relative path, we can figure out the application directory.
-        final String appRoot = "vendor/unbundled_google/packages/Turbo";
+        final String appRoot = "packages/apps/SettingsIntelligence";
         final String manifestPath = appRoot + "/AndroidManifest.xml";
         final String resDir = appRoot + "tests/robotests/res";
         final String assetsDir = appRoot + config.assetDir();
@@ -56,28 +55,10 @@ public class SettingsIntelligenceRobolectricTestRunner extends RobolectricTestRu
                         Fs.fileFromPath(manifestPath),
                         Fs.fileFromPath(resDir),
                         Fs.fileFromPath(assetsDir)) {
-                    @Override
-                    public List<ResourcePath> getIncludedResourcePaths() {
-                        List<ResourcePath> paths = super.getIncludedResourcePaths();
-                        paths.add(
-                                new ResourcePath(
-                                        getPackageName(),
-                                        Fs.fileFromPath(
-                                                "./vendor/unbundled_google/packages/"
-                                                        + "Turbo/tests/robotests/res"),
-                                        null));
-                        paths.add(
-                                new ResourcePath(
-                                        getPackageName(),
-                                        Fs.fileFromPath(
-                                                "./vendor/unbundled_google/packages/Turbo/res"),
-                                        null));
-                        return paths;
-                    }
                 };
 
         // Set the package name to the renamed one
-        manifest.setPackageName("com.google.android.apps.turbo");
+        manifest.setPackageName("com.android.settings.intelligence");
         return manifest;
     }
 }

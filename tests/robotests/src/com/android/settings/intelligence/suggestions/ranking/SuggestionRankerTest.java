@@ -39,16 +39,15 @@ public class SuggestionRankerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mFeatures = new HashMap<>();
-        mFeatures.put("pkg1", new HashMap<>());
-        mFeatures.put("pkg2", new HashMap<>());
-        mFeatures.put("pkg3", new HashMap<>());
-        mSuggestions = new ArrayList<Suggestion>() {
-            {
-                add(new Suggestion.Builder("pkg1").build());
-                add(new Suggestion.Builder("pkg2").build());
-                add(new Suggestion.Builder("pkg3").build());
-            }
-        };
+        mFeatures.put("pkg1", new HashMap<String, Double>());
+        mFeatures.put("pkg2", new HashMap<String, Double>());
+        mFeatures.put("pkg3", new HashMap<String, Double>());
+        mSuggestions = new ArrayList<>();
+
+        mSuggestions.add(new Suggestion.Builder("pkg1").build());
+        mSuggestions.add(new Suggestion.Builder("pkg2").build());
+        mSuggestions.add(new Suggestion.Builder("pkg3").build());
+
         mSuggestionFeaturizer = mock(SuggestionFeaturizer.class);
         mSuggestionRanker = new SuggestionRanker(mSuggestionFeaturizer);
         when(mSuggestionFeaturizer.featurize(mSuggestions)).thenReturn(mFeatures);
@@ -60,13 +59,11 @@ public class SuggestionRankerTest {
 
     @Test
     public void testRank() {
-        List<Suggestion> expectedOrderdList = new ArrayList<Suggestion>() {
-            {
-                add(mSuggestions.get(0)); // relevance = 0.9
-                add(mSuggestions.get(2)); // relevance = 0.5
-                add(mSuggestions.get(1)); // relevance = 0.1
-            }
-        };
+        final List<Suggestion> expectedOrderdList = new ArrayList<>();
+        expectedOrderdList.add(mSuggestions.get(0)); // relevance = 0.9
+        expectedOrderdList.add(mSuggestions.get(2)); // relevance = 0.5
+        expectedOrderdList.add(mSuggestions.get(1)); // relevance = 0.1
+
         mSuggestionRanker.rankSuggestions(mSuggestions);
         assertThat(mSuggestions).isEqualTo(expectedOrderdList);
     }

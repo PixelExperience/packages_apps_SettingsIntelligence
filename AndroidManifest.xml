@@ -23,7 +23,7 @@
 
     <application
         android:label="@string/app_name_settings_intelligence"
-        android:icon="@drawable/ic_launcher_settings_intelligence">
+        android:icon="@mipmap/ic_launcher">
         <service
             android:name=".suggestions.SuggestionService"
             android:exported="true"
