@@ -28,19 +28,19 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 
-import com.android.settings.intelligence.SettingsIntelligenceRobolectricTestRunner;
 import com.android.settings.intelligence.TestConfig;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowPackageManager;
 
-@RunWith(SettingsIntelligenceRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class FeatureEligibilityCheckerTest {
 
