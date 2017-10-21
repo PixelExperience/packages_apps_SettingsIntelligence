@@ -47,6 +47,11 @@ public class SuggestionService extends android.service.settings.suggestions.Sugg
                 .markSuggestionDismissed(this /* context */, id);
     }
 
+    @Override
+    public void onSuggestionLaunched(Suggestion suggestion) {
+        Log.d(TAG, "Suggestion launched" + suggestion.getId());
+    }
+
     public static SharedPreferences getSharedPrefs(Context context) {
         return context.getApplicationContext()
                 .getSharedPreferences(SHARED_PREF_FILENAME, Context.MODE_PRIVATE);
