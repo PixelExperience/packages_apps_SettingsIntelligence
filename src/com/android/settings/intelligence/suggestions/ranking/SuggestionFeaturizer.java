@@ -16,6 +16,7 @@
 
 package com.android.settings.intelligence.suggestions.ranking;
 
+import android.content.Context;
 import android.service.settings.suggestions.Suggestion;
 
 import java.util.ArrayList;
@@ -47,16 +48,10 @@ public class SuggestionFeaturizer {
     public static final double TIME_NORMALIZATION_FACTOR = 2e10;
     public static final double COUNT_NORMALIZATION_FACTOR = 500;
 
-    private final EventStore mEventStore;
+    private final SuggestionEventStore mEventStore;
 
-    /**
-     * Constructor
-     *
-     * @param eventStore An instance of {@code EventStore} which maintains the recorded suggestion
-     *                   events.
-     */
-    public SuggestionFeaturizer(EventStore eventStore) {
-        mEventStore = eventStore;
+    public SuggestionFeaturizer(Context context) {
+        mEventStore = SuggestionEventStore.get(context);
     }
 
     /**
@@ -68,19 +63,22 @@ public class SuggestionFeaturizer {
     public Map<String, Map<String, Double>> featurize(List<Suggestion> suggestions) {
         Map<String, Map<String, Double>> features = new HashMap<>();
         Long curTimeMs = System.currentTimeMillis();
-        List<String> pkgNames = new ArrayList<>(suggestions.size());
+        final List<String> suggestionIds = new ArrayList<>(suggestions.size());
         for (Suggestion suggestion : suggestions) {
-            pkgNames.add(suggestion.getId());
+            suggestionIds.add(suggestion.getId());
         }
-        for (String pkgName : pkgNames) {
+        for (String id : suggestionIds) {
             Map<String, Double> featureMap = new HashMap<>();
-            features.put(pkgName, featureMap);
-            Long lastShownTime = mEventStore
-                    .readMetric(pkgName, EventStore.EVENT_SHOWN, EventStore.METRIC_LAST_EVENT_TIME);
-            Long lastDismissedTime = mEventStore.readMetric(pkgName, EventStore.EVENT_DISMISSED,
-                    EventStore.METRIC_LAST_EVENT_TIME);
-            Long lastClickedTime = mEventStore.readMetric(pkgName, EventStore.EVENT_CLICKED,
-                    EventStore.METRIC_LAST_EVENT_TIME);
+            features.put(id, featureMap);
+            Long lastShownTime = mEventStore.readMetric(id,
+                    SuggestionEventStore.EVENT_SHOWN,
+                    SuggestionEventStore.METRIC_LAST_EVENT_TIME);
+            Long lastDismissedTime = mEventStore.readMetric(id,
+                    SuggestionEventStore.EVENT_DISMISSED,
+                    SuggestionEventStore.METRIC_LAST_EVENT_TIME);
+            Long lastClickedTime = mEventStore.readMetric(id,
+                    SuggestionEventStore.EVENT_CLICKED,
+                    SuggestionEventStore.METRIC_LAST_EVENT_TIME);
             featureMap.put(FEATURE_IS_SHOWN, booleanToDouble(lastShownTime > 0));
             featureMap.put(FEATURE_IS_DISMISSED, booleanToDouble(lastDismissedTime > 0));
             featureMap.put(FEATURE_IS_CLICKED, booleanToDouble(lastClickedTime > 0));
@@ -90,12 +88,12 @@ public class SuggestionFeaturizer {
                     normalizedTimeDiff(curTimeMs, lastDismissedTime));
             featureMap.put(FEATURE_TIME_FROM_LAST_CLICKED,
                     normalizedTimeDiff(curTimeMs, lastClickedTime));
-            featureMap.put(FEATURE_SHOWN_COUNT, normalizedCount(mEventStore
-                    .readMetric(pkgName, EventStore.EVENT_SHOWN, EventStore.METRIC_COUNT)));
-            featureMap.put(FEATURE_DISMISSED_COUNT, normalizedCount(mEventStore
-                    .readMetric(pkgName, EventStore.EVENT_DISMISSED, EventStore.METRIC_COUNT)));
-            featureMap.put(FEATURE_CLICKED_COUNT, normalizedCount(mEventStore
-                    .readMetric(pkgName, EventStore.EVENT_CLICKED, EventStore.METRIC_COUNT)));
+            featureMap.put(FEATURE_SHOWN_COUNT, normalizedCount(mEventStore.readMetric(id,
+                    SuggestionEventStore.EVENT_SHOWN, SuggestionEventStore.METRIC_COUNT)));
+            featureMap.put(FEATURE_DISMISSED_COUNT, normalizedCount(mEventStore.readMetric(id,
+                    SuggestionEventStore.EVENT_DISMISSED, SuggestionEventStore.METRIC_COUNT)));
+            featureMap.put(FEATURE_CLICKED_COUNT, normalizedCount(mEventStore.readMetric(id,
+                    SuggestionEventStore.EVENT_CLICKED, SuggestionEventStore.METRIC_COUNT)));
         }
         return features;
     }

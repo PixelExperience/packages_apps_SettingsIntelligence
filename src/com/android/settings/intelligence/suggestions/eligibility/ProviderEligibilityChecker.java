@@ -48,8 +48,7 @@ public class ProviderEligibilityChecker {
     }
 
     private static boolean isEnabledInMetadata(Context context, String id, ResolveInfo info) {
-        final int isSupportedResource =
-                info.activityInfo.metaData.getInt(META_DATA_IS_SUPPORTED);
+        final int isSupportedResource = info.activityInfo.metaData.getInt(META_DATA_IS_SUPPORTED);
         try {
             final Resources res = context.getPackageManager()
                     .getResourcesForApplication(info.activityInfo.applicationInfo);

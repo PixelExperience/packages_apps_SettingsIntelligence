@@ -16,44 +16,61 @@
 
 package com.android.settings.intelligence.suggestions;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.service.settings.suggestions.Suggestion;
 import android.util.Log;
 
-import com.android.settings.intelligence.suggestions.ranking.SuggestionRanker;
+import com.android.settings.intelligence.overlay.FeatureFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SuggestionService extends android.service.settings.suggestions.SuggestionService {
 
     private static final String TAG = "SuggestionService";
 
-    private static final String SHARED_PREF_FILENAME = "suggestions";
-
     @Override
     public List<Suggestion> onGetSuggestions() {
-        final SuggestionParser parser = new SuggestionParser(this);
-        final List<Suggestion> list = parser.getSuggestions();
-        SuggestionRanker.getInstance(this).rankSuggestions(list);
+        final long startTime = System.currentTimeMillis();
+        final List<Suggestion> list = FeatureFactory.get(this)
+                .suggestionFeatureProvider()
+                .getSuggestions(this);
+
+        final List<String> ids = new ArrayList<>(list.size());
+        for (Suggestion suggestion : list) {
+            ids.add(suggestion.getId());
+        }
+        final long endTime = System.currentTimeMillis();
+        FeatureFactory.get(this)
+                .metricsFeatureProvider(this)
+                .logGetSuggestion(ids, endTime - startTime);
         return list;
     }
 
     @Override
     public void onSuggestionDismissed(Suggestion suggestion) {
+        final long startTime = System.currentTimeMillis();
         final String id = suggestion.getId();
         Log.d(TAG, "dismissing suggestion " + id);
-        SuggestionDismissHandler.getInstance()
+        final long endTime = System.currentTimeMillis();
+        FeatureFactory.get(this)
+                .suggestionFeatureProvider()
                 .markSuggestionDismissed(this /* context */, id);
+        FeatureFactory.get(this)
+                .metricsFeatureProvider(this)
+                .logDismissSuggestion(id, endTime - startTime);
     }
 
     @Override
     public void onSuggestionLaunched(Suggestion suggestion) {
-        Log.d(TAG, "Suggestion launched" + suggestion.getId());
-    }
-
-    public static SharedPreferences getSharedPrefs(Context context) {
-        return context.getApplicationContext()
-                .getSharedPreferences(SHARED_PREF_FILENAME, Context.MODE_PRIVATE);
+        final long startTime = System.currentTimeMillis();
+        final String id = suggestion.getId();
+        Log.d(TAG, "Suggestion is launched" + id);
+        final long endTime = System.currentTimeMillis();
+        FeatureFactory.get(this)
+                .suggestionFeatureProvider()
+                .markSuggestionLaunched(this, id);
+        FeatureFactory.get(this)
+                .metricsFeatureProvider(this)
+                .logLaunchSuggestion(id, endTime - startTime);
     }
 }
