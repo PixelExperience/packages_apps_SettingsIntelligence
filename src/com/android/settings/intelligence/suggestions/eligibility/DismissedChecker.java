@@ -23,8 +23,8 @@ import android.support.annotation.VisibleForTesting;
 import android.text.format.DateUtils;
 import android.util.Log;
 
-import com.android.settings.intelligence.suggestions.SuggestionDismissHandler;
-import com.android.settings.intelligence.suggestions.SuggestionService;
+import com.android.settings.intelligence.overlay.FeatureFactory;
+import com.android.settings.intelligence.suggestions.SuggestionFeatureProvider;
 
 public class DismissedChecker {
 
@@ -42,7 +42,8 @@ public class DismissedChecker {
 
     // Shared prefs keys for storing dismissed state.
     // Index into current dismissed state.
-    private static final String SETUP_TIME = "_setup_time";
+    @VisibleForTesting
+    static final String SETUP_TIME = "_setup_time";
     // Default dismiss rule for suggestions.
 
     private static final int DEFAULT_FIRST_APPEAR_DAY = 0;
@@ -51,30 +52,37 @@ public class DismissedChecker {
 
     public static boolean isEligible(Context context, String id, ResolveInfo info,
             boolean ignoreAppearRule) {
-        final SharedPreferences prefs = SuggestionService.getSharedPrefs(context);
-        final SuggestionDismissHandler dismissHandler = SuggestionDismissHandler.getInstance();
+        final SuggestionFeatureProvider featureProvider = FeatureFactory.get(context)
+                .suggestionFeatureProvider();
+        final SharedPreferences prefs = featureProvider.getSharedPrefs(context);
+        final long currentTimeMs = System.currentTimeMillis();
         final String keySetupTime = id + SETUP_TIME;
         if (!prefs.contains(keySetupTime)) {
             prefs.edit()
-                    .putLong(keySetupTime, System.currentTimeMillis())
+                    .putLong(keySetupTime, currentTimeMs)
                     .apply();
         }
 
         // Check if it's already manually dismissed
-        final boolean isDismissed = dismissHandler.isSuggestionDismissed(context, id);
+        final boolean isDismissed = featureProvider.isSuggestionDismissed(context, id);
         if (isDismissed) {
             return false;
         }
 
-        // Parse when suggestion should first appear. return true to artificially hide suggestion
-        // before then.
+        // Parse when suggestion should first appear. Hide suggestion before then.
         int firstAppearDay = ignoreAppearRule
                 ? DEFAULT_FIRST_APPEAR_DAY
                 : parseAppearDay(info);
-        long firstAppearDayInMs = getEndTime(prefs.getLong(keySetupTime, 0), firstAppearDay);
-        if (System.currentTimeMillis() >= firstAppearDayInMs) {
+        long setupTime = prefs.getLong(keySetupTime, 0);
+        if (setupTime > currentTimeMs) {
+            // SetupTime is the future, user's date/time is probably wrong at some point.
+            // Force setupTime to be now. So we get a more reasonable firstAppearDay.
+            setupTime = currentTimeMs;
+        }
+        final long firstAppearDayInMs = getFirstAppearTimeMillis(setupTime, firstAppearDay);
+        if (currentTimeMs >= firstAppearDayInMs) {
             // Dismiss timeout has passed, undismiss it.
-            dismissHandler.markSuggestionNotDismissed(context, id);
+            featureProvider.markSuggestionNotDismissed(context, id);
             return true;
         }
         return false;
@@ -104,8 +112,8 @@ public class DismissedChecker {
         }
     }
 
-    private static long getEndTime(long startTime, int daysDelay) {
+    private static long getFirstAppearTimeMillis(long setupTime, int daysDelay) {
         long days = daysDelay * DateUtils.DAY_IN_MILLIS;
-        return startTime + days;
+        return setupTime + days;
     }
 }
