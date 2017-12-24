@@ -17,23 +17,20 @@
 
 package com.android.settings.intelligence.search;
 
-import static com.android.settings.intelligence.nano.SettingsIntelligenceLogProto
-        .SettingsIntelligenceEvent;
+import static com.android.settings.intelligence.nano.SettingsIntelligenceLogProto.SettingsIntelligenceEvent;
 
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Loader;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -42,7 +39,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
-import android.widget.TextView;
 import android.widget.Toolbar;
 
 import com.android.settings.intelligence.R;
@@ -177,10 +173,6 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
         mSearchView.setOnQueryTextListener(this);
         mSearchView.requestFocus();
 
-        // TODO Refactor
-//        ActionBarShadowController.attachToRecyclerView(
-//                view.findViewById(R.id.search_bar_container), getLifecycle(),
-// mResultsRecyclerView);
         return view;
     }
 
@@ -325,6 +317,8 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
             mNoResultsView.setVisibility(View.VISIBLE);
             mMetricsFeatureProvider.logEvent(SettingsIntelligenceEvent.SHOW_SEARCH_NO_RESULT,
                     queryToResultLatencyMs);
+            EventLog.writeEvent(90204 /* settings_latency*/, 1 /* query_to_result_latency */,
+                    (int) queryToResultLatencyMs);
         } else {
             mNoResultsView.setVisibility(View.GONE);
             mResultsRecyclerView.scrollToPosition(0);
