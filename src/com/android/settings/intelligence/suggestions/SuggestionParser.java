@@ -30,6 +30,8 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.settings.intelligence.overlay.FeatureFactory;
+import com.android.settings.intelligence.suggestions.eligibility.CandidateSuggestionFilter;
 import com.android.settings.intelligence.suggestions.model.CandidateSuggestion;
 import com.android.settings.intelligence.suggestions.model.SuggestionCategory;
 import com.android.settings.intelligence.suggestions.model.SuggestionListBuilder;
@@ -58,7 +60,8 @@ class SuggestionParser {
         mContext = context.getApplicationContext();
         mPackageManager = context.getPackageManager();
         mAddCache = new ArrayMap<>();
-        mSharedPrefs = SuggestionService.getSharedPrefs(mContext);
+        mSharedPrefs = FeatureFactory.get(mContext)
+                .suggestionFeatureProvider().getSharedPrefs(mContext);
     }
 
     public List<Suggestion> getSuggestions() {
@@ -96,13 +99,24 @@ class SuggestionParser {
         probe.addCategory(category.getCategory());
         List<ResolveInfo> results = mPackageManager
                 .queryIntentActivities(probe, PackageManager.GET_META_DATA);
+
+        // Build a list of eligible candidates
+        final List<CandidateSuggestion> eligibleCandidates = new ArrayList<>();
         for (ResolveInfo resolved : results) {
             final CandidateSuggestion candidate = new CandidateSuggestion(mContext, resolved,
                     ignoreDismissRule);
             if (!candidate.isEligible()) {
                 continue;
             }
+            eligibleCandidates.add(candidate);
+        }
+        // Then remove completed ones
+        final List<CandidateSuggestion> incompleteSuggestions = CandidateSuggestionFilter
+                .getInstance()
+                .filterCandidates(mContext, eligibleCandidates);
 
+        // Convert the rest to suggestion.
+        for (CandidateSuggestion candidate : incompleteSuggestions) {
             final String id = candidate.getId();
             Suggestion suggestion = mAddCache.get(id);
             if (suggestion == null) {
@@ -137,67 +151,4 @@ class SuggestionParser {
                 + category.getCategory());
         return elapsedTime > category.getExclusiveExpireDaysInMillis();
     }
-
-//
-//    /**
-//     * Gets text associated with the input key from the content provider.
-//     * @param context context
-//     * @param uriString URI for the content provider
-//     * @param providerMap Maps URI authorities to providers
-//     * @param key Key mapping to the text in bundle returned by the content provider
-//     * @return Text associated with the key, if returned by the content provider
-//     */
-//    public static String getTextFromUri(Context context, String uriString,
-//            Map<String, IContentProvider> providerMap, String key) {
-//        Bundle bundle = getBundleFromUri(context, uriString, providerMap);
-//        return (bundle != null) ? bundle.getString(key) : null;
-//    }
-//
-//    private static Bundle getBundleFromUri(Context context, String uriString,
-//            Map<String, IContentProvider> providerMap) {
-//        if (TextUtils.isEmpty(uriString)) {
-//            return null;
-//        }
-//        Uri uri = Uri.parse(uriString);
-//        String method = getMethodFromUri(uri);
-//        if (TextUtils.isEmpty(method)) {
-//            return null;
-//        }
-//        IContentProvider provider = getProviderFromUri(context, uri, providerMap);
-//        if (provider == null) {
-//            return null;
-//        }
-//        try {
-//            return provider.call(context.getPackageName(), method, uriString, null);
-//        } catch (RemoteException e) {
-//            return null;
-//        }
-//    }
-//
-//    private static IContentProvider getProviderFromUri(Context context, Uri uri,
-//            Map<String, IContentProvider> providerMap) {
-//        if (uri == null) {
-//            return null;
-//        }
-//        String authority = uri.getAuthority();
-//        if (TextUtils.isEmpty(authority)) {
-//            return null;
-//        }
-//        if (!providerMap.containsKey(authority)) {
-//            providerMap.put(authority, context.getContentResolver().acquireUnstableProvider(uri));
-//        }
-//        return providerMap.get(authority);
-//    }
-//
-//    /** Returns the first path segment of the uri if it exists as the method, otherwise null. */
-//    static String getMethodFromUri(Uri uri) {
-//        if (uri == null) {
-//            return null;
-//        }
-//        List<String> pathSegments = uri.getPathSegments();
-//        if ((pathSegments == null) || pathSegments.isEmpty()) {
-//            return null;
-//        }
-//        return pathSegments.get(0);
-//    }
 }

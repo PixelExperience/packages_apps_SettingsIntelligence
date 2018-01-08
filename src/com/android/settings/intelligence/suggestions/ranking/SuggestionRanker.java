@@ -20,6 +20,9 @@ import android.content.Context;
 import android.service.settings.suggestions.Suggestion;
 import android.support.annotation.VisibleForTesting;
 
+import com.android.settings.intelligence.overlay.FeatureFactory;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,6 +33,7 @@ import java.util.Map;
  * Copied from packages/apps/Settings/src/.../dashboard/suggestions/SuggestionRanker
  */
 public class SuggestionRanker {
+
     private static final String TAG = "SuggestionRanker";
 
     // The following coefficients form a linear model, which mixes the features to obtain a
@@ -46,39 +50,48 @@ public class SuggestionRanker {
         put(SuggestionFeaturizer.FEATURE_SHOWN_COUNT, -2.35993512546);
     }};
 
-    private static SuggestionRanker sInstance;
-
+    private final long mMaxSuggestionsDisplayCount;
     private final SuggestionFeaturizer mSuggestionFeaturizer;
-    private final Map<Suggestion, Double> relevanceMetrics;
+    private final Map<Suggestion, Double> mRelevanceMetrics;
 
     Comparator<Suggestion> suggestionComparator = new Comparator<Suggestion>() {
         @Override
         public int compare(Suggestion suggestion1, Suggestion suggestion2) {
-            return relevanceMetrics.get(suggestion1) < relevanceMetrics.get(suggestion2) ? 1 : -1;
+            return mRelevanceMetrics.get(suggestion1) < mRelevanceMetrics.get(suggestion2) ? 1 : -1;
         }
     };
 
-    @VisibleForTesting
-    SuggestionRanker(SuggestionFeaturizer suggestionFeaturizer) {
+    public SuggestionRanker(Context context, SuggestionFeaturizer suggestionFeaturizer) {
         mSuggestionFeaturizer = suggestionFeaturizer;
-        relevanceMetrics = new HashMap<>();
+        mRelevanceMetrics = new HashMap<>();
+        mMaxSuggestionsDisplayCount = FeatureFactory.get(context).experimentFeatureProvider()
+                .getMaxSuggestionDisplayCount(context);
     }
 
-    public static SuggestionRanker getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new SuggestionRanker(
-                    new SuggestionFeaturizer(new EventStore(context.getApplicationContext())));
-        }
-        return sInstance;
-    }
-
-    public void rankSuggestions(List<Suggestion> suggestions) {
-        relevanceMetrics.clear();
+    /**
+     * Filter out suggestions that are not relevant at the moment, and rank the rest.
+     *
+     * @return a list of suggestion ranked by relevance.
+     */
+    public List<Suggestion> rankRelevantSuggestions(List<Suggestion> suggestions) {
+        mRelevanceMetrics.clear();
         Map<String, Map<String, Double>> features = mSuggestionFeaturizer.featurize(suggestions);
         for (Suggestion suggestion : suggestions) {
-            relevanceMetrics.put(suggestion, getRelevanceMetric(features.get(suggestion.getId())));
+            mRelevanceMetrics.put(suggestion, getRelevanceMetric(features.get(suggestion.getId())));
         }
-        Collections.sort(suggestions, suggestionComparator);
+        final List<Suggestion> rankedSuggestions = new ArrayList<>();
+        rankedSuggestions.addAll(suggestions);
+        Collections.sort(rankedSuggestions, suggestionComparator);
+
+        if (rankedSuggestions.size() < mMaxSuggestionsDisplayCount) {
+            return rankedSuggestions;
+        } else {
+            final List<Suggestion> relevantSuggestions = new ArrayList<>();
+            for (int i = 0; i < mMaxSuggestionsDisplayCount; i++) {
+                relevantSuggestions.add(rankedSuggestions.get(i));
+            }
+            return relevantSuggestions;
+        }
     }
 
     @VisibleForTesting

@@ -17,23 +17,27 @@
 package com.android.settings.intelligence.suggestions.model;
 
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Bundle;
 import android.service.settings.suggestions.Suggestion;
+import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.RemoteViews;
 
 import com.android.settings.intelligence.suggestions.eligibility.AccountEligibilityChecker;
 import com.android.settings.intelligence.suggestions.eligibility.ConnectivityEligibilityChecker;
 import com.android.settings.intelligence.suggestions.eligibility.DismissedChecker;
 import com.android.settings.intelligence.suggestions.eligibility.FeatureEligibilityChecker;
 import com.android.settings.intelligence.suggestions.eligibility.ProviderEligibilityChecker;
+
+import java.util.List;
 
 /**
  * A wrapper to {@link android.content.pm.ResolveInfo} that matches Suggestion signature.
@@ -43,15 +47,20 @@ import com.android.settings.intelligence.suggestions.eligibility.ProviderEligibi
  */
 public class CandidateSuggestion {
 
-    public static final String META_DATA_PREFERENCE_ICON_TINTABLE =
-            "com.android.settings.icon_tintable";
+    private static final String TAG = "CandidateSuggestion";
 
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify the title text that should be displayed for the preference.
+     */
+    @VisibleForTesting
     public static final String META_DATA_PREFERENCE_TITLE = "com.android.settings.title";
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
      * to specify the summary text that should be displayed for the preference.
      */
+    @VisibleForTesting
     public static final String META_DATA_PREFERENCE_SUMMARY = "com.android.settings.summary";
 
     /**
@@ -61,23 +70,28 @@ public class CandidateSuggestion {
      *
      * Summary provided by the content provider overrides any static summary.
      */
+    @VisibleForTesting
     public static final String META_DATA_PREFERENCE_SUMMARY_URI =
             "com.android.settings.summary_uri";
-
-    public static final String META_DATA_PREFERENCE_CUSTOM_VIEW =
-            "com.android.settings.custom_view";
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
      * to specify the icon that should be displayed for the preference.
      */
+    @VisibleForTesting
     public static final String META_DATA_PREFERENCE_ICON = "com.android.settings.icon";
 
-    private static final String TAG = "CandidateSuggestion";
+    /**
+     * Hint for type of suggestion UI to be displayed.
+     */
+    @VisibleForTesting
+    public static final String META_DATA_PREFERENCE_CUSTOM_VIEW =
+            "com.android.settings.custom_view";
 
     private final String mId;
     private final Context mContext;
     private final ResolveInfo mResolveInfo;
+    private final ComponentName mComponent;
     private final Intent mIntent;
     private final boolean mIsEligible;
     private final boolean mIgnoreAppearRule;
@@ -87,14 +101,19 @@ public class CandidateSuggestion {
         mContext = context;
         mIgnoreAppearRule = ignoreAppearRule;
         mResolveInfo = resolveInfo;
-        mIntent = new Intent()
-                .setClassName(resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name);
+        mIntent = new Intent().setClassName(
+                resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name);
+        mComponent = mIntent.getComponent();
         mId = generateId();
         mIsEligible = initIsEligible();
     }
 
     public String getId() {
         return mId;
+    }
+
+    public ComponentName getComponent() {
+        return mComponent;
     }
 
     /**
@@ -142,71 +161,121 @@ public class CandidateSuggestion {
 
     private void updateBuilder(Suggestion.Builder builder) {
         final PackageManager pm = mContext.getPackageManager();
-        final ApplicationInfo applicationInfo = mResolveInfo.activityInfo.applicationInfo;
+        final String packageName = mComponent.getPackageName();
 
-        int icon = 0;
-        boolean iconTintable = false;
-        String title = null;
-        String summary = null;
-        RemoteViews remoteViews = null;
+        int iconRes = 0;
+        int flags = 0;
+        CharSequence title = null;
+        CharSequence summary = null;
+        Icon icon = null;
 
         // Get the activity's meta-data
         try {
-            final Resources res = pm.getResourcesForApplication(applicationInfo.packageName);
+            final Resources res = pm.getResourcesForApplication(packageName);
             final Bundle metaData = mResolveInfo.activityInfo.metaData;
 
             if (res != null && metaData != null) {
+                // First get override data
+                final Bundle overrideData = getOverrideData(metaData);
+                // Get icon
                 if (metaData.containsKey(META_DATA_PREFERENCE_ICON)) {
-                    icon = metaData.getInt(META_DATA_PREFERENCE_ICON);
+                    iconRes = metaData.getInt(META_DATA_PREFERENCE_ICON);
+                } else {
+                    iconRes = mResolveInfo.activityInfo.icon;
                 }
-                if (metaData.containsKey(META_DATA_PREFERENCE_ICON_TINTABLE)) {
-                    iconTintable = metaData.getBoolean(META_DATA_PREFERENCE_ICON_TINTABLE);
+                if (iconRes != 0) {
+                    icon = Icon.createWithResource(
+                            mResolveInfo.activityInfo.packageName, iconRes);
                 }
-                if (metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
+                // Get title
+                title = getStringFromBundle(overrideData, META_DATA_PREFERENCE_TITLE);
+                if (TextUtils.isEmpty(title) && metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
                     if (metaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
                         title = res.getString(metaData.getInt(META_DATA_PREFERENCE_TITLE));
                     } else {
                         title = metaData.getString(META_DATA_PREFERENCE_TITLE);
                     }
                 }
-                if (metaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
+                // Get summary
+                summary = getStringFromBundle(overrideData, META_DATA_PREFERENCE_SUMMARY);
+                if (TextUtils.isEmpty(summary)
+                        && metaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
                     if (metaData.get(META_DATA_PREFERENCE_SUMMARY) instanceof Integer) {
                         summary = res.getString(metaData.getInt(META_DATA_PREFERENCE_SUMMARY));
                     } else {
                         summary = metaData.getString(META_DATA_PREFERENCE_SUMMARY);
                     }
                 }
-                if (metaData.containsKey(META_DATA_PREFERENCE_CUSTOM_VIEW)) {
-                    int layoutId = metaData.getInt(META_DATA_PREFERENCE_CUSTOM_VIEW);
-                    remoteViews = new RemoteViews(applicationInfo.packageName, layoutId);
-                }
+                // Detect remote view
+                flags = metaData.containsKey(META_DATA_PREFERENCE_CUSTOM_VIEW)
+                        ? Suggestion.FLAG_HAS_BUTTON : 0;
             }
         } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
-            Log.d(TAG, "Couldn't find info", e);
+            Log.w(TAG, "Couldn't find info", e);
         }
 
         // Set the preference title to the activity's label if no
         // meta-data is found
         if (TextUtils.isEmpty(title)) {
-            title = mResolveInfo.activityInfo.loadLabel(pm).toString();
+            title = mResolveInfo.activityInfo.loadLabel(pm);
         }
-
-        if (icon == 0) {
-            icon = mResolveInfo.activityInfo.icon;
-        }
-        // TODO: Need to use ContentProvider to read dynamic title/summary etc.
-        final PendingIntent pendingIntent = PendingIntent
-                .getActivity(mContext, 0 /* requestCode */, mIntent, 0 /* flags */);
         builder.setTitle(title)
                 .setSummary(summary)
-                .setPendingIntent(pendingIntent);
-        // TODO: Need to extend Suggestion and set the following.
-        // set icon
-        // set icon tintable
-        // set remote view
+                .setFlags(flags)
+                .setIcon(icon)
+                .setPendingIntent(PendingIntent
+                        .getActivity(mContext, 0 /* requestCode */, mIntent, 0 /* flags */));
+    }
+
+    /**
+     * Extracts a string from bundle.
+     */
+    private CharSequence getStringFromBundle(Bundle bundle, String key) {
+        if (bundle == null || TextUtils.isEmpty(key)) {
+            return null;
+        }
+        return bundle.getString(key);
+    }
+
+    private Bundle getOverrideData(Bundle metadata) {
+        if (metadata == null || !metadata.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
+            Log.d(TAG, "Metadata null or has no info about summary_uri");
+            return null;
+        }
+
+        final String uriString = metadata.getString(META_DATA_PREFERENCE_SUMMARY_URI);
+        final Bundle bundle = getBundleFromUri(uriString);
+        return bundle;
+    }
+
+    /**
+     * Calls method through ContentProvider and expects a bundle in return.
+     */
+    private Bundle getBundleFromUri(String uriString) {
+        final Uri uri = Uri.parse(uriString);
+
+        final String method = getMethodFromUri(uri);
+        if (TextUtils.isEmpty(method)) {
+            return null;
+        }
+        return mContext.getContentResolver().call(uri, method, null /* args */, null /* bundle */);
+    }
+
+    /**
+     * Returns the first path segment of the uri if it exists as the method, otherwise null.
+     */
+    private String getMethodFromUri(Uri uri) {
+        if (uri == null) {
+            return null;
+        }
+        final List<String> pathSegments = uri.getPathSegments();
+        if ((pathSegments == null) || pathSegments.isEmpty()) {
+            return null;
+        }
+        return pathSegments.get(0);
     }
 
     private String generateId() {
-        return mIntent.getComponent().flattenToString();
+        return mComponent.flattenToString();
     }
 }
