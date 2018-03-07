@@ -69,7 +69,8 @@ public class InstalledAppResultTask extends SearchQueryTask.QueryWorker {
 
         List<ApplicationInfo> appsInfo = mPackageManager.getInstalledApplications(
                 PackageManager.MATCH_DISABLED_COMPONENTS
-                        | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS);
+                        | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                        | PackageManager.MATCH_INSTANT);
 
         for (ApplicationInfo info : appsInfo) {
             final CharSequence label = info.loadLabel(mPackageManager);
