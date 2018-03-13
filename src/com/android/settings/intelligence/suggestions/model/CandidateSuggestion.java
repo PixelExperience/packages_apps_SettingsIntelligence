@@ -258,7 +258,13 @@ public class CandidateSuggestion {
         if (TextUtils.isEmpty(method)) {
             return null;
         }
-        return mContext.getContentResolver().call(uri, method, null /* args */, null /* bundle */);
+        try {
+            return mContext.getContentResolver().call(uri, method, null /* args */,
+                    null /* bundle */);
+        } catch (IllegalArgumentException e){
+            Log.d(TAG, "Unknown summary_uri", e);
+            return null;
+        }
     }
 
     /**
