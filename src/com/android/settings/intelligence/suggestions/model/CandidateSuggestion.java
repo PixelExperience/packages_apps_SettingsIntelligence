@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.settings.intelligence.suggestions.eligibility.AccountEligibilityChecker;
+import com.android.settings.intelligence.suggestions.eligibility.AutomotiveEligibilityChecker;
 import com.android.settings.intelligence.suggestions.eligibility.ConnectivityEligibilityChecker;
 import com.android.settings.intelligence.suggestions.eligibility.DismissedChecker;
 import com.android.settings.intelligence.suggestions.eligibility.FeatureEligibilityChecker;
@@ -154,6 +155,9 @@ public class CandidateSuggestion {
             return false;
         }
         if (!DismissedChecker.isEligible(mContext, mId, mResolveInfo, mIgnoreAppearRule)) {
+            return false;
+        }
+        if (!AutomotiveEligibilityChecker.isEligible(mContext, mId, mResolveInfo)) {
             return false;
         }
         return true;
