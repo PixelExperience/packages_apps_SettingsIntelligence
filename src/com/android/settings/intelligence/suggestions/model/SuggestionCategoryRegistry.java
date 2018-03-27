@@ -28,6 +28,9 @@ public class SuggestionCategoryRegistry {
     static final String CATEGORY_KEY_DEFERRED_SETUP =
             "com.android.settings.suggested.category.DEFERRED_SETUP";
     @VisibleForTesting
+    static final String CATEGORY_KEY_HIGH_PRIORITY =
+        "com.android.settings.suggested.category.HIGH_PRIORITY";
+    @VisibleForTesting
     static final String CATEGORY_KEY_FIRST_IMPRESSION =
             "com.android.settings.suggested.category.FIRST_IMPRESSION";
 
@@ -40,6 +43,8 @@ public class SuggestionCategoryRegistry {
         CATEGORIES = new ArrayList<>();
         CATEGORIES.add(buildCategory(CATEGORY_KEY_DEFERRED_SETUP,
                 true /* exclusive */, 14 * DateUtils.DAY_IN_MILLIS));
+        CATEGORIES.add(buildCategory(CATEGORY_KEY_HIGH_PRIORITY,
+                true /* exclusive */, 3 * DateUtils.DAY_IN_MILLIS));
         CATEGORIES.add(buildCategory(CATEGORY_KEY_FIRST_IMPRESSION,
                 true /* exclusive */, 14 * DateUtils.DAY_IN_MILLIS));
         CATEGORIES.add(buildCategory("com.android.settings.suggested.category.LOCK_SCREEN",
