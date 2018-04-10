@@ -49,7 +49,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.SearchIndexableResource;
 import android.provider.SearchIndexablesContract;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
