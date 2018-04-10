@@ -24,13 +24,13 @@ LOCAL_SDK_VERSION := system_current
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    android-support-v4 \
-    android-support-v13 \
-    android-support-v7-appcompat \
-    android-support-v7-cardview \
-    android-support-v7-preference \
-    android-support-v7-recyclerview \
-    android-support-v14-preference
+    androidx.legacy_legacy-support-v4 \
+    androidx.legacy_legacy-support-v13 \
+    androidx.appcompat_appcompat \
+    androidx.cardview_cardview \
+    androidx.preference_preference \
+    androidx.recyclerview_recyclerview \
+    androidx.legacy_legacy-preference-v14
 
 LOCAL_USE_AAPT2 := true
 
