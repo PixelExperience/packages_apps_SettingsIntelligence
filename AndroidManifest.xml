@@ -18,7 +18,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.settings.intelligence">
 
-    <uses-sdk android:minSdkVersion="27" android:targetSdkVersion="27" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
     <uses-permission android:name="android.permission.READ_SEARCH_INDEXABLES" />
