@@ -30,6 +30,7 @@ import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.settings.intelligence.R;
 import com.android.settings.intelligence.suggestions.model.CandidateSuggestion;
 
 import java.util.ArrayList;
@@ -48,7 +49,6 @@ import java.util.concurrent.TimeoutException;
 public class CandidateSuggestionFilter {
 
     private static final String TAG = "CandidateSuggestionFilter";
-    private static final long CHECK_TASK_TIMEOUT_MS = 200;
 
     private static CandidateSuggestionFilter sChecker;
     private static ExecutorService sExecutorService;
@@ -78,7 +78,9 @@ public class CandidateSuggestionFilter {
         }
         for (CandidateFilterTask task : checkTasks) {
             try {
-                final CandidateSuggestion candidate = task.get(CHECK_TASK_TIMEOUT_MS,
+                long checkTaskTimeOutValue =
+                        context.getResources().getInteger(R.integer.check_task_timeout_ms);
+                final CandidateSuggestion candidate = task.get(checkTaskTimeOutValue,
                         TimeUnit.MILLISECONDS);
                 if (candidate != null) {
                     incompleteCandidates.add(candidate);
