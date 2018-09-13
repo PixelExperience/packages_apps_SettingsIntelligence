@@ -30,7 +30,7 @@ public class SearchResultAggregator {
      * Timeout for subsequent tasks to allow for fast returning tasks.
      * TODO(70164062): Tweak the timeout values.
      */
-    private static final long SHORT_CHECK_TASK_TIMEOUT_MS = 300;
+    private static final long SHORT_CHECK_TASK_TIMEOUT_MS = 600;
 
     private static SearchResultAggregator sResultAggregator;
 
