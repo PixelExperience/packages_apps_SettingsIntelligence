@@ -285,7 +285,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
      */
     static void setIndexed(Context context, List<ResolveInfo> providers) {
         final String localeStr = Locale.getDefault().toString();
-        final String fingerprint = Build.FINGERPRINT;
+        final String fingerprint = Build.CUSTOM_FINGERPRINT;
         final String providerVersionedNames =
                 IndexDatabaseHelper.buildProviderVersionedNames(context, providers);
         context.getSharedPreferences(SHARED_PREFS_TAG, Context.MODE_PRIVATE)
@@ -306,7 +306,7 @@ public class IndexDatabaseHelper extends SQLiteOpenHelper {
      */
     static boolean isFullIndex(Context context, List<ResolveInfo> providers) {
         final String localeStr = Locale.getDefault().toString();
-        final String fingerprint = Build.FINGERPRINT;
+        final String fingerprint = Build.CUSTOM_FINGERPRINT;
         final String providerVersionedNames =
                 IndexDatabaseHelper.buildProviderVersionedNames(context, providers);
         final SharedPreferences prefs = context
