@@ -21,7 +21,9 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_PROGUARD_FLAG_FILES := proguard.cfg
 
 LOCAL_SDK_VERSION := system_current
+LOCAL_PRODUCT_MODULE := true
 LOCAL_PRIVILEGED_MODULE := true
+LOCAL_REQUIRED_MODULES := privapp_whitelist_com.android.settings.intelligence
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     androidx.legacy_legacy-support-v4 \
