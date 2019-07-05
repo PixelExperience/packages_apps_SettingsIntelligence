@@ -31,9 +31,12 @@ import com.android.settings.intelligence.search.SearchResult;
 import com.android.settings.intelligence.search.indexing.DatabaseIndexingUtils;
 import com.android.settings.intelligence.search.sitemap.SiteMapManager;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.android.internal.util.custom.OverlayUtils;
 
 /**
  * Search loader for installed apps.
@@ -75,7 +78,8 @@ public class InstalledAppResultTask extends SearchQueryTask.QueryWorker {
         for (ApplicationInfo info : appsInfo) {
             final CharSequence label = info.loadLabel(mPackageManager);
             final int wordDiff = SearchQueryUtils.getWordDifference(label.toString(), mQuery);
-            if (wordDiff == SearchQueryUtils.NAME_NO_MATCH) {
+            if (wordDiff == SearchQueryUtils.NAME_NO_MATCH ||
+                    Arrays.asList(OverlayUtils.AllPackages).contains(info.packageName)) {
                 continue;
             }
 
