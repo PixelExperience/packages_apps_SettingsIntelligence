@@ -37,4 +37,7 @@
 
     <!-- Dashboard tile image margin start / end -->
     <dimen name="dashboard_tile_image_margin">24dp</dimen>
+
+    <!-- Search item -->
+    <dimen name="search_item_text_padding_start">8dp</dimen>
 </resources>

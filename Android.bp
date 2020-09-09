@@ -30,6 +30,7 @@ android_app {
         "androidx.preference_preference",
         "androidx.recyclerview_recyclerview",
         "androidx.legacy_legacy-preference-v14",
+        "com.google.android.material_material",
     ],
     resource_dirs: ["res"],
     srcs: [

@@ -45,4 +45,5 @@
     </string>
 
     <string name="search_no_results">No results</string>
+    <string name="search_hint_text">Search settings</string>
 </resources>

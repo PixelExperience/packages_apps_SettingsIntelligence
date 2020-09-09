@@ -20,4 +20,8 @@
     <declare-styleable name="Preference">
         <attr name="keywords" format="string" />
     </declare-styleable>
+    <attr name="mtrlLinearBarHeight" format="reference|dimension">
+    </attr>
+    <attr name="mtrlLinearBarInset" format="reference|dimension">
+    </attr>
 </resources>
