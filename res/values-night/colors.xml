@@ -16,7 +16,7 @@
 
 <resources>
 
-    <color name="search_panel_background">@*android:color/notification_material_background_color</color>
-    <color name="search_panel">@*android:color/notification_material_background_color</color>
+    <color name="search_panel_background">#000</color>
+    <color name="search_panel">@*android:color/material_grey_800</color>
 
 </resources>

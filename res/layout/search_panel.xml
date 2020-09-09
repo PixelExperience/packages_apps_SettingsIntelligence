@@ -48,7 +48,8 @@
                     android:layout_height="match_parent"
                     android:iconifiedByDefault="false"
                     android:imeOptions="actionSearch|flagNoExtractUi"
-                    android:searchIcon="@null"/>
+                    android:searchIcon="@null"
+                    android:theme="@style/SearchViewStyle"/>
             </Toolbar>
         </androidx.cardview.widget.CardView>
     </FrameLayout>
